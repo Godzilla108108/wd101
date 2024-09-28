@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Registration Form</h1>
+<form id="registrationForm">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" required><br>
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" required><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" required><br>
+    <label for="dob">Date of Birth:</label><br>
+    <input type="date" id="dob" required><br>
+    <label for="terms">
+        <input type="checkbox" id="terms" required> Accept terms
+    </label><br><br>
+    <input type="submit" value="Register">
+</form>
+
+<table id="userTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Dob</th>
+            <th>Accepted terms?</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    const registrationForm = document.getElementById('registrationForm');
+    const userTable = document.getElementById('userTable').querySelector('tbody');
+
+    // Load existing users from local storage on page load
+    window.onload = function() {
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        users.forEach(addRowToTable);
+    };
+
+    registrationForm.onsubmit = function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const dob = new Date(document.getElementById('dob').value);
+        const terms = document.getElementById('terms').checked;
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        // Calculate age
+        const age = new Date().getFullYear() - dob.getFullYear();
+        if (age < 18 || age > 55) {
+            alert('You must be between 18 and 55 years old.');
+            return;
+        }
+
+        // Save user data
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const newUser = { name, email, password, dob: dob.toISOString().split('T')[0], terms };
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+
+        // Add new user to table
+        addRowToTable(newUser);
+        registrationForm.reset();
+    };
+
+    function addRowToTable(user) {
+        const row = userTable.insertRow();
+        row.insertCell(0).textContent = user.name;
+        row.insertCell(1).textContent = user.email;
+        row.insertCell(2).textContent = user.password;
+        row.insertCell(3).textContent = user.dob;
+        row.insertCell(4).textContent = user.terms ? 'Yes' : 'No';
+    }
+</script>
+
+</body>
+</html>
